@@ -1,0 +1,21 @@
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+:{$PORT:8080} {
+	encode zstd gzip
+
+	handle /hooks/* {
+		reverse_proxy 127.0.0.1:8800
+	}
+
+	# Railway's public domain is served only over HTTPS, terminated at its edge.
+	handle {
+		reverse_proxy 127.0.0.1:8799 {
+			header_up X-Forwarded-Proto https
+			flush_interval -1
+		}
+	}
+}
